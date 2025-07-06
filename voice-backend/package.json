@@ -3,6 +3,7 @@
     "@deepgram/sdk": "^2.4.0",
     "@types/socket.io": "^3.0.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
     "http": "^0.0.1-security",
     "nodemon": "^3.0.1",
     "openai": "^4.3.1",

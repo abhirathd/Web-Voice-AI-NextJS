@@ -1,7 +1,9 @@
 import { Deepgram } from "@deepgram/sdk";
 import { LiveTranscription } from "@deepgram/sdk/dist/transcription/liveTranscription";
+import dotenv from "dotenv";
+dotenv.config();
 
-const DEEPGRAM_API_KEY = "";
+const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
 
 type TranscriptReceivedEventHandler = (data: string) => Promise<void>;
 

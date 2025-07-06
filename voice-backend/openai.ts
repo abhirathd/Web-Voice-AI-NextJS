@@ -1,8 +1,10 @@
 import { OpenAI } from "openai";
 import { CreateChatCompletionRequestMessage } from "openai/resources/chat";
+import dotenv from "dotenv";
+dotenv.config();
 
 const openai = new OpenAI({
-  apiKey: "",
+  apiKey: process.env.OPENAI_API_KEYY,
 });
 
 // define initial message - the system telling OpenAI how to act
