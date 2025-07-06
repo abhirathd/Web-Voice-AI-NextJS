@@ -11,6 +11,9 @@ export function getDeepgramLiveConnection(
   transcriptReceivedEventHandler: TranscriptReceivedEventHandler
 ): LiveTranscription {
   // Instantiate Deepgram object
+  if (!DEEPGRAM_API_KEY) {
+    throw new Error("DEEPGRAM_API_KEY is not set in the environment variables.");
+  }
   const deepgram = new Deepgram(DEEPGRAM_API_KEY);
   const deepgramLive = deepgram.transcription.live({
     language: "en",

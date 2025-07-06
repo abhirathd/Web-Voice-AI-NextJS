@@ -4,6 +4,12 @@ import { getDeepgramLiveConnection } from "./deepgram";
 import { getOpenAIChatCompletion } from "./openai";
 import { getElevenLabsAudio } from "./elevenLabs";
 import { LiveTranscription } from "@deepgram/sdk/dist/transcription/liveTranscription";
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("OPENAI_API_KEYY", process.env.OPENAI_API_KEYY);
+console.log("DEEPGRAM_API_KEY", process.env.DEEPGRAM_API_KEY);
+console.log("ELEVENLABS_API_KEY", process.env.ELEVENLABS_API_KEY);
 
 const server = http.createServer();
 
