@@ -1,0 +1,100 @@
+import http from "http";
+import { Server, Socket } from "socket.io";
+import { getDeepgramLiveConnection } from "./deepgram";
+import { getOpenAIChatCompletion } from "./openai";
+import { getElevenLabsAudio } from "./elevenLabs";
+import { LiveTranscription } from "@deepgram/sdk/dist/transcription/liveTranscription";
+
+const server = http.createServer();
+
+const socketIOServer = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+
+let clientSocket: Socket;
+let deepgramLive: LiveTranscription;
+
+// Initialize Deepgram connection
+function initializeDeepgramConnection() {
+  console.log("Initializing new Deepgram connection...");
+  deepgramLive = getDeepgramLiveConnection(async (data: string) => {
+    const transcriptData = JSON.parse(data);
+    if (transcriptData.type !== "Results") {
+      return;
+    }
+    
+    const transcript = transcriptData.channel.alternatives[0].transcript ?? "";
+    const isFinal = transcriptData.is_final;
+    
+    if (transcript && clientSocket) {
+      if (isFinal) {
+        // Send final transcript
+        console.log(`Final transcript: "${transcript}"`);
+        clientSocket.emit("finalTranscript", transcript);
+        
+        // Get AI response
+        const openAIResponse = await getOpenAIChatCompletion(transcript);
+        console.log(`AI Response: ${openAIResponse}`);
+        
+        // Send AI response text first
+        clientSocket.emit("aiResponse", openAIResponse);
+        
+        // Then get and send audio
+        const elevenLabsAudio = await getElevenLabsAudio(openAIResponse);
+        clientSocket.emit("audioData", elevenLabsAudio);
+        console.log("Sent audio data to frontend.");
+      } else {
+        // Send interim transcript for real-time display
+        clientSocket.emit("transcript", transcript);
+      }
+    }
+  });
+}
+
+// Initialize connection on startup
+initializeDeepgramConnection();
+
+socketIOServer.on("connection", (socket) => {
+  console.log("socket: client connected");
+  clientSocket = socket;
+
+  socket.on("packet-sent", (data) => {
+    const readyState = deepgramLive?.getReadyState();
+    
+    if (readyState === 1) {
+      // Connection is open, send data
+      deepgramLive.send(data);
+    } else if (readyState === 3 || readyState === undefined) {
+      // Connection is closed or doesn't exist, reinitialize
+      console.log("Deepgram connection closed, reinitializing...");
+      initializeDeepgramConnection();
+      
+      // Wait a moment for connection to establish, then try sending
+      setTimeout(() => {
+        if (deepgramLive?.getReadyState() === 1) {
+          deepgramLive.send(data);
+          console.log("Data sent after reconnection");
+        } else {
+          console.log("Failed to reconnect to Deepgram");
+        }
+      }, 1000);
+    } else {
+      console.log(
+        `socket: data couldn't be sent to deepgram. readyState was ${readyState}`
+      );
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("socket: client disconnected");
+    if (deepgramLive && deepgramLive.getReadyState() === 1) {
+      deepgramLive.finish();
+    }
+  });
+});
+
+server.listen(4000, () => {
+  console.log("server listening on port 4000");
+});
