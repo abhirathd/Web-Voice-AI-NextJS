@@ -1,15 +1,10 @@
-import { Deepgram } from "@deepgram/sdk";
-import { LiveTranscription } from "@deepgram/sdk/dist/transcription/liveTranscription";
-import dotenv from "dotenv";
+const { Deepgram } = require("@deepgram/sdk");
+const dotenv = require("dotenv");
 dotenv.config();
 
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
 
-type TranscriptReceivedEventHandler = (data: string) => Promise<void>;
-
-export function getDeepgramLiveConnection(
-  transcriptReceivedEventHandler: TranscriptReceivedEventHandler
-): LiveTranscription {
+function getDeepgramLiveConnection(transcriptReceivedEventHandler) {
   // Instantiate Deepgram object
   if (!DEEPGRAM_API_KEY) {
     throw new Error("DEEPGRAM_API_KEY is not set in the environment variables.");
@@ -42,3 +37,5 @@ export function getDeepgramLiveConnection(
 
   return deepgramLive;
 }
+
+module.exports = { getDeepgramLiveConnection };

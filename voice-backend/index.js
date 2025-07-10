@@ -1,10 +1,9 @@
-import http from "http";
-import { Server, Socket } from "socket.io";
-import { getDeepgramLiveConnection } from "./deepgram";
-import { getOpenAIChatCompletion } from "./openai";
-import { getElevenLabsAudio } from "./elevenLabs";
-import { LiveTranscription } from "@deepgram/sdk/dist/transcription/liveTranscription";
-import dotenv from "dotenv";
+const http = require("http");
+const { Server } = require("socket.io");
+const { getDeepgramLiveConnection } = require("./deepgram");
+const { getOpenAIChatCompletion } = require("./openai");
+const { getElevenLabsAudio } = require("./elevenLabs");
+const dotenv = require("dotenv");
 dotenv.config();
 
 console.log("OPENAI_API_KEYY", process.env.OPENAI_API_KEYY);
@@ -19,13 +18,13 @@ const socketIOServer = new Server(server, {
   },
 });
 
-let clientSocket: Socket;
-let deepgramLive: LiveTranscription;
+let clientSocket;
+let deepgramLive;
 
 // Initialize Deepgram connection
 function initializeDeepgramConnection() {
   console.log("Initializing new Deepgram connection...");
-  deepgramLive = getDeepgramLiveConnection(async (data: string) => {
+  deepgramLive = getDeepgramLiveConnection(async (data) => {
     const transcriptData = JSON.parse(data);
     if (transcriptData.type !== "Results") {
       return;
@@ -51,7 +50,7 @@ function initializeDeepgramConnection() {
 }
 
 // Shared function to process user messages (from voice or text)
-async function processUserMessage(message: string) {
+async function processUserMessage(message) {
   try {
     // Get AI response
     const openAIResponse = await getOpenAIChatCompletion(message);
@@ -103,7 +102,7 @@ socketIOServer.on("connection", (socket) => {
   });
 
   // Handle text messages from frontend
-  socket.on("textMessage", async (message: string) => {
+  socket.on("textMessage", async (message) => {
     console.log(`Text message received: "${message}"`);
     
     // Echo the message back as finalTranscript for consistency

@@ -1,6 +1,5 @@
-import { OpenAI } from "openai";
-import { CreateChatCompletionRequestMessage } from "openai/resources/chat";
-import dotenv from "dotenv";
+const { OpenAI } = require("openai");
+const dotenv = require("dotenv");
 dotenv.config();
 
 const openai = new OpenAI({
@@ -8,7 +7,7 @@ const openai = new OpenAI({
 });
 
 // define initial message - the system telling OpenAI how to act
-const messages: Array<CreateChatCompletionRequestMessage> = [
+const messages = [
   {
     role: "system",
     content:
@@ -17,9 +16,7 @@ const messages: Array<CreateChatCompletionRequestMessage> = [
 ];
 
 // define a simple interface for getting the next message in the chat.
-export async function getOpenAIChatCompletion(
-  newMessage: string
-): Promise<string> {
+async function getOpenAIChatCompletion(newMessage) {
   //   get chat completion by sending all previous messages, including the latest one
   messages.push({
     role: "user",
@@ -31,3 +28,5 @@ export async function getOpenAIChatCompletion(
   });
   return chatCompletion.choices[0].message.content || "";
 }
+
+module.exports = { getOpenAIChatCompletion };
