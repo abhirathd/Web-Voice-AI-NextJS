@@ -94,7 +94,7 @@ export default function Home() {
 
       // Handle audio response
       socket.on("audioData", (arrayBuffer: ArrayBuffer) => {
-        setIsAISpeaking(true);
+        setIsAISpeaking(false);
         const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
         const audioUrl = URL.createObjectURL(blob);
         const audioElement = new Audio(audioUrl);
