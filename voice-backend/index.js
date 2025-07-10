@@ -14,7 +14,7 @@ const server = http.createServer();
 
 const socketIOServer = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://63ccf2655dee.ngrok-free.app",
   },
 });
 
